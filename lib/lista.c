@@ -1,5 +1,11 @@
 #include "lib/lista.h"
 
+
+/*
+    listaInserirInicio
+    parâmetros: Ponteiro para lista e um valor inteiro para inserir
+    retorno: Lista com valor inteiro inserido no início
+*/
 Lista* listaInserirInicio(Lista* l, int valor){
     Lista* no = (Lista*)malloc(sizeof(Lista));
     if(no == NULL) exit(1);
@@ -10,6 +16,11 @@ Lista* listaInserirInicio(Lista* l, int valor){
     return no;
 }
 
+/*
+    listaInserirFinal
+    parâmetros: Ponteiro para lista e um valor inteiro para inserir
+    retorno: Lista com valor inteiro inserido no final
+*/
 Lista* listaInserirFinal(Lista* l, int valor){
     Lista* no = (Lista*)malloc(sizeof(Lista));
     if(no == NULL) exit(1);
@@ -30,6 +41,11 @@ Lista* listaInserirFinal(Lista* l, int valor){
     return l;
 }
 
+/*
+    listaReoordenar
+    parâmetros: Ponteiro para lista
+    retorno: Lista reoordenada
+*/
 Lista* listaReoordenar(Lista* l){
     // se a lista original for vazia retorna nulo
     if(l == NULL){
@@ -65,6 +81,11 @@ Lista* listaReoordenar(Lista* l){
     return l_par;
 }
 
+/*
+    listaImprimir
+    parâmetro: Ponteiro para lista
+    retorno: nenhum, imprime a lista no terminal
+*/
 void listaImprimir(Lista* l){
     while(l != NULL){
         printf("%d -> ", l->numero);
@@ -73,6 +94,11 @@ void listaImprimir(Lista* l){
     printf("NULL\n");
 }
 
+/*
+    listaLiberar
+    parâmetros: Ponteiro para lista
+    retorno: Nenhum, libera memória alocada da lista
+*/
 void listaLiberar(Lista* l){
     Lista* atual = l;
     Lista* proximo_no;
