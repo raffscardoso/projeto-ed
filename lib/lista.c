@@ -1,19 +1,19 @@
-#include "lib/lista.h"
-
+#include "lista.h"
 
 /*
     listaInserirInicio
     parâmetros: Ponteiro para lista e um valor inteiro para inserir
     retorno: Lista com valor inteiro inserido no início
 */
-Lista* listaInserirInicio(Lista* l, int valor){
-    Lista* no = (Lista*)malloc(sizeof(Lista));
-    if(no == NULL) exit(1);
+Lista *listaInserirInicio(Lista *l, int valor) {
+  Lista *no = (Lista *)malloc(sizeof(Lista));
+  if (no == NULL)
+    exit(1);
 
-    no->numero = valor;
-    no->prox = l;
+  no->numero = valor;
+  no->prox = l;
 
-    return no;
+  return no;
 }
 
 /*
@@ -21,24 +21,25 @@ Lista* listaInserirInicio(Lista* l, int valor){
     parâmetros: Ponteiro para lista e um valor inteiro para inserir
     retorno: Lista com valor inteiro inserido no final
 */
-Lista* listaInserirFinal(Lista* l, int valor){
-    Lista* no = (Lista*)malloc(sizeof(Lista));
-    if(no == NULL) exit(1);
+Lista *listaInserirFinal(Lista *l, int valor) {
+  Lista *no = (Lista *)malloc(sizeof(Lista));
+  if (no == NULL)
+    exit(1);
 
-    no->numero = valor;
-    no->prox = NULL;
+  no->numero = valor;
+  no->prox = NULL;
 
-    if(l == NULL){
-        return no;
-    }
+  if (l == NULL) {
+    return no;
+  }
 
-    Lista* l_aux = l;
-    while(l_aux->prox != NULL){
-        l_aux = l_aux->prox;
-    }
-    l_aux->prox = no;
+  Lista *l_aux = l;
+  while (l_aux->prox != NULL) {
+    l_aux = l_aux->prox;
+  }
+  l_aux->prox = no;
 
-    return l;
+  return l;
 }
 
 /*
@@ -46,39 +47,39 @@ Lista* listaInserirFinal(Lista* l, int valor){
     parâmetros: Ponteiro para lista
     retorno: Lista reoordenada
 */
-Lista* listaReoordenar(Lista* l){
-    // se a lista original for vazia retorna nulo
-    if(l == NULL){
-        return NULL;
+Lista *listaReoordenar(Lista *l) {
+  // se a lista original for vazia retorna nulo
+  if (l == NULL) {
+    return NULL;
+  }
+
+  // declaração das listas
+  Lista *l_par = NULL;
+  Lista *l_impar = NULL;
+  Lista *l_aux = l;
+
+  while (l_aux != NULL) {
+    if (l_aux->numero % 2 == 0) {
+      l_par = listaInserirFinal(l_par, l_aux->numero);
+    } else {
+      l_impar = listaInserirFinal(l_impar, l_aux->numero);
     }
+    l_aux = l_aux->prox;
+  }
 
-    // declaração das listas
-    Lista* l_par = NULL;
-    Lista* l_impar = NULL;
-    Lista* l_aux = l;
-    
-    while(l_aux != NULL){
-        if(l_aux->numero % 2 == 0){
-            l_par = inserir_final(l_par, l_aux->numero);
-        }else{
-            l_impar = inserir_final(l_impar, l_aux->numero);
-        }
-        l_aux = l_aux->prox;
-    }
+  if (l_par == NULL) {
+    return l_impar;
+  }
 
-    if(l_par == NULL){
-        return l_impar;
-    }
+  Lista *ultimo_par = l_par;
 
-    Lista* ultimo_par = l_par;
+  while (ultimo_par->prox != NULL) {
+    ultimo_par = ultimo_par->prox;
+  }
 
-    while(ultimo_par->prox != NULL){
-        ultimo_par = ultimo_par->prox;
-    }
+  ultimo_par->prox = l_impar;
 
-    ultimo_par->prox = l_impar;
-
-    return l_par;
+  return l_par;
 }
 
 /*
@@ -86,12 +87,12 @@ Lista* listaReoordenar(Lista* l){
     parâmetro: Ponteiro para lista
     retorno: nenhum, imprime a lista no terminal
 */
-void listaImprimir(Lista* l){
-    while(l != NULL){
-        printf("%d -> ", l->numero);
-        l = l->prox;
-    }
-    printf("NULL\n");
+void listaImprimir(Lista *l) {
+  while (l != NULL) {
+    printf("%d -> ", l->numero);
+    l = l->prox;
+  }
+  printf("NULL\n");
 }
 
 /*
@@ -99,13 +100,13 @@ void listaImprimir(Lista* l){
     parâmetros: Ponteiro para lista
     retorno: Nenhum, libera memória alocada da lista
 */
-void listaLiberar(Lista* l){
-    Lista* atual = l;
-    Lista* proximo_no;
+void listaLiberar(Lista *l) {
+  Lista *atual = l;
+  Lista *proximo_no;
 
-    while(atual != NULL){
-        proximo_no = atual->prox;
-        free(atual);
-        atual = proximo_no;
-    }
+  while (atual != NULL) {
+    proximo_no = atual->prox;
+    free(atual);
+    atual = proximo_no;
+  }
 }
