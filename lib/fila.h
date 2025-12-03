@@ -4,7 +4,7 @@
 #include "arvore.h"
 
 typedef struct nodoFila {
-    No* dado;
+    char* mensagem;
     struct nodoFila* prox;
 } NodoFila;
 
@@ -15,9 +15,11 @@ typedef struct {
 
 void filaInicializar(Fila* f);
 int  filaVazia(Fila* f);
-void filaEnfileirar(Fila* f, No* valor);
-No*  filaDesenfileirar(Fila* f);
+void filaEnfileirar(Fila* f, const char* msg);
+char*  filaDesenfileirar(Fila* f);
 No*  filaPrimeiro(Fila* f);
 void filaLimpar(Fila* f);
+
+void filaSalvarLog(Fila* f, const char* nomeArquivo);
 
 #endif
