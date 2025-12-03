@@ -1,0 +1,10 @@
+bin/
+obj/
+*.o
+
+
+.vscode/
+
+.Trashes
+ehthumbs.db
+Thumbs.db

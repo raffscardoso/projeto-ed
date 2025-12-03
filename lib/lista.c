@@ -1,37 +1,40 @@
 #include "lista.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-void listaInicializar(Lista* l) {
-    l->inicio = NULL;
+// Inventário (lista simples)
+void inventarioAdicionar(Item **head, ItemTipo tipo, int valor) {
+  if (!head)
+    return;
+  Item *novo = malloc(sizeof(Item));
+  novo->tipo = tipo;
+  novo->valor = valor;
+  novo->prox = *head;
+  *head = novo;
 }
 
-int listaVazia(Lista* l) {
-    return l->inicio == NULL;
+void inventarioListar(Item *head) {
+  Item *it = head;
+  printf("Inventario:\n");
+  while (it) {
+    if (it->tipo == ITEM_ARMADURA)
+      printf(" - Armadura (+%d defesa)\n", it->valor);
+    else if (it->tipo == ITEM_ARMA)
+      printf(" - Arma (+%d forca)\n", it->valor);
+    else
+      printf(" - Amuleto (+%d vida)\n", it->valor);
+    it = it->prox;
+  }
 }
 
-// Insere um inteiro no começo da lista
-void listaInserirInicio(Lista* l, int elemento) {
-    NodoLista* novo = (NodoLista*)malloc(sizeof(NodoLista));
-    novo->info = elemento;
-    novo->prox = l->inicio;
-    l->inicio = novo;
-}
-
-// Remove o primeiro elemento e retorna seu valor ou -1 caso a lista esteja vazia
-int listaRemoverInicio(Lista* l) {
-    if (listaVazia(l)) return -1;
-
-    NodoLista* aux = l->inicio;
-    int valor = aux->info;
-
-    l->inicio = aux->prox;
-    free(aux); 
-
-    return valor;
-}
-
-void listaLimparMemoria(Lista* l) {
-    while (!listaVazia(l)) {
-        listaRemoverInicio(l);
-    }
+void inventarioLiberar(Item **head) {
+  if (!head)
+    return;
+  Item *it = *head;
+  while (it) {
+    Item *aux = it->prox;
+    free(it);
+    it = aux;
+  }
+  *head = NULL;
 }

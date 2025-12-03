@@ -1,19 +1,18 @@
 #ifndef LISTA_H
 #define LISTA_H
 
-typedef struct nodoLista {
-    int info;
-    struct nodoLista* prox;
-} NodoLista;
+// -------------- INVENTÁRIO (LISTA SIMPLES) ----------------
 
-typedef struct {
-    NodoLista* inicio;
-} Lista;
+typedef enum { ITEM_ARMADURA, ITEM_ARMA, ITEM_AMULETO } ItemTipo;
 
-void listaInicializar(Lista* l);
-int  listaVazia(Lista* l);
-void listaInserirInicio(Lista* l, int elemento);
-int  listaRemoverInicio(Lista* l);
-void listaLimparMemoria(Lista* l);
+typedef struct item {
+  ItemTipo tipo;
+  int valor; // quantidade a adicionar na estatística
+  struct item *prox;
+} Item;
+
+void inventarioAdicionar(Item **head, ItemTipo tipo, int valor);
+void inventarioListar(Item *head);
+void inventarioLiberar(Item **head);
 
 #endif
