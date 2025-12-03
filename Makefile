@@ -34,6 +34,7 @@ run: all
 
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	rm -rf *.txt
 	@echo "Limpeza concluída."
 
 .PHONY: all clean run createdirs
