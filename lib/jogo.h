@@ -15,6 +15,7 @@ typedef struct {
 
   // atributos do jogador
   int vida;
+  int vidaMaxima;
   int forca;
   int defesa;
 
@@ -33,6 +34,6 @@ void resolverEncontroComum(Jogador *j, No *destino);
 void resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz);
 void jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila* log);
 void inventarioAplicarAoJogador(Item *it, Jogador *j);
-int lerInteiro(); // leitura segura de inteiro (usa fgets)
+int lerInteiro(); 
 
 #endif
