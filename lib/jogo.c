@@ -77,7 +77,7 @@ int batalhaContraInimigo(Jogador *j, int poderInimigo) {
       "Inimigo (Poder: %d) vs Jogador %d (Vida: %d, Forca: %d, Defesa: %d)\n",
       poderInimigo, j->id, j->vida, j->forca, j->defesa);
 
-  int vidaInimigo = poderInimigo * 5;
+  int vidaInimigo = poderInimigo * 3;
 
   while (j->vida > 0 && vidaInimigo > 0) {
     // turno do Jogador
@@ -102,7 +102,7 @@ int batalhaContraInimigo(Jogador *j, int poderInimigo) {
 
     // turno do Inimigo
     variacao = (rand() % 11) - 5;
-    int danoInimigo = (poderInimigo - j->defesa) + variacao;
+    int danoInimigo = (poderInimigo / 2 - j->defesa) + variacao;
     if (danoInimigo < 0)
       danoInimigo = 0;
 
@@ -301,7 +301,7 @@ int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log) {
         "O ar aqui e denso, mas nao ha perigo aparente. Voce segue adiante.",
         "A passagem se estreita e depois se abre em uma caverna vazia. Tudo "
         "calmo.",
-        "Rochas humidas e um eco distante. Nenhum sinal de presenca inimiga.",
+        "Rochas umidas e um eco distante. Nenhum sinal de presenca inimiga.",
         "Uma area estranhamente serena. Bom para um breve descanso, mas você "
         "não tem tempo para isso."};
 

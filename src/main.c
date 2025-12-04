@@ -4,19 +4,30 @@
 #include <stdlib.h>
 #include <time.h>
 
+// logica para esperar o enter para limpeza do terminal
+void esperar_enter() {
+  printf("\n\n--- Pressione Enter para continuar ---");
+  fflush(stdout);
+  int c;
+  do {
+    c = getchar();
+  } while (c != '\n' && c != EOF);
+}
+
 int main() {
   srand(time(NULL));
 
-  // 1. Inicializar o Log
+  // inicializar o Log
   Fila logEventos;
   filaInicializar(&logEventos);
   filaEnfileirar(&logEventos, "--- INICIO DO JOGO CODEBATTLE ---");
 
+  system("clear");
   printf("========================\n");
   printf("=   CODEBATTLE (C)    =\n");
   printf("========================\n\n");
 
-  // Criar a árvore
+  // cria a árvore
   No *raiz = arvoreCriar();
 
   // Jogadores
@@ -27,7 +38,7 @@ int main() {
   jogadorInicializar(&j1, 1, inicioJ1);
   jogadorInicializar(&j2, 2, inicioJ2);
 
-  // Log inicial
+  // log inicial
   char msgInicial[200];
   sprintf(msgInicial, "J1 em %s | J2 em %s", j1.atual->nome, j2.atual->nome);
   filaEnfileirar(&logEventos, msgInicial);
@@ -36,6 +47,8 @@ int main() {
          j1.atual->index);
   printf("Jogador 2 comecou em: %s (index %d)\n\n", j2.atual->nome,
          j2.atual->index);
+
+  esperar_enter();
 
   int opcao;
   int vencedor = 0;               // 0 = jogo continua
@@ -49,6 +62,7 @@ int main() {
       printf("\n=== Jogador 1 defendeu o NUCLEO-X e venceu o jogo! ===\n");
       filaEnfileirar(&logEventos, "VITORIA: Jogador 1 defendeu o NUCLEO-X!");
       vencedor = 1;
+      esperar_enter();
       break;
     }
 
@@ -67,6 +81,7 @@ int main() {
     opcao = lerInteiro();
     if (opcao < 0) {
       printf("Entrada invalida.\n");
+      esperar_enter();
       continue;
     }
 
@@ -99,11 +114,14 @@ int main() {
       }
     } else if (opcao != -1) {
       printf("Opcao invalida.\n");
+      esperar_enter();
       continue;
     }
 
-    if (vencedor != 0)
+    if (vencedor != 0) {
+      esperar_enter();
       break;
+    }
 
     // lógica de posse do Nucleo-X
     if (j1.atual == raiz && nucleo_chegou_primeiro == 0) {
@@ -112,13 +130,16 @@ int main() {
       nucleo_chegou_primeiro = 1;
     }
 
+    esperar_enter();
+    system("clear");
+
     // Turno jogador 2
     // checa vitoria por espera
-    system("clear");
     if (nucleo_chegou_primeiro == 2) {
       printf("\n=== Jogador 2 defendeu o NUCLEO-X e venceu o jogo! ===\n");
       filaEnfileirar(&logEventos, "VITORIA: Jogador 2 defendeu o NUCLEO-X!");
       vencedor = 2;
+      esperar_enter();
       break;
     }
 
@@ -138,6 +159,7 @@ int main() {
     opcao = lerInteiro();
     if (opcao < 0) {
       printf("Entrada invalida.\n");
+      esperar_enter();
       continue;
     }
 
@@ -170,11 +192,14 @@ int main() {
       }
     } else if (opcao != -1) {
       printf("Opcao invalida.\n");
+      esperar_enter();
       continue;
     }
 
-    if (vencedor != 0)
+    if (vencedor != 0) {
+      esperar_enter();
       break;
+    }
 
     // lógica de posse do Nucleo-X
     if (j2.atual == raiz && nucleo_chegou_primeiro == 0) {
@@ -182,6 +207,8 @@ int main() {
              "vencer. !!!\n");
       nucleo_chegou_primeiro = 2;
     }
+
+    esperar_enter();
   }
 
   printf("\nSalvando log de eventos...\n");
