@@ -218,7 +218,7 @@ int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log) {
             j->id, outro->id, destino->nome);
     filaEnfileirar(log, buffer);
 
-    return resolverDuelo(j, outro, destino, raiz); // Retorna o vencedor
+    return resolverDuelo(j, outro, destino, raiz);
   }
 
   // logica do nó de batalha
@@ -227,7 +227,7 @@ int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log) {
             destino->nome);
     filaEnfileirar(log, buffer);
     resolverEncontroComum(j, destino, log);
-    return 0; // resolverEncontroComum handles movement if player wins
+    return 0;
   }
 
   // Se o nó estiver ocupado pelo outro jogador (e não for Nucleo-X), impede o
@@ -312,7 +312,7 @@ int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log) {
             destino->nome);
     filaEnfileirar(log, buffer);
   }
-  return 0; // Jogo continua
+  return 0;
 }
 
 int resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz) {

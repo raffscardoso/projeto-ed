@@ -78,6 +78,7 @@ int main() {
            "Direita\n4 - "
            "Ver inventario\n5 - Usar Pocao\n0 - Sair\nEscolha: ");
     fflush(stdout);
+
     opcao = lerInteiro();
     if (opcao < 0) {
       printf("Entrada invalida.\n");
