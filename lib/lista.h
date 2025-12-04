@@ -1,8 +1,6 @@
 #ifndef LISTA_H
 #define LISTA_H
 
-// -------------- INVENTÁRIO (LISTA SIMPLES) ----------------
-
 typedef enum { ITEM_ARMADURA, ITEM_ARMA, ITEM_AMULETO, ITEM_POCAO } ItemTipo;
 
 typedef struct item {

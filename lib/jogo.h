@@ -2,9 +2,9 @@
 #define JOGO_H
 
 #include "arvore.h"
+#include "fila.h"
 #include "lista.h"
 #include "pilha.h"
-#include "fila.h"
 
 // Jogador
 typedef struct {
@@ -26,14 +26,11 @@ typedef struct {
 void jogadorInicializar(Jogador *j, int id, No *inicio);
 void jogadorVisitarNo(Jogador *j, No *no);
 
-// movimento: direcao = -1 (esquerda no mesmo nível), +1 (direita no mesmo
-// nível), 2 (subir/ir ao pai)
 No *obterNoDestino(No *raiz, Jogador *j, int direcao);
-No *obterNoPai(No *raiz, Jogador *j);
-void resolverEncontroComum(Jogador *j, No *destino);
-void resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz);
-void jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila* log);
+void resolverEncontroComum(Jogador *j, No *destino, Fila *log);
+int resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz);
+int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log);
 void inventarioAplicarAoJogador(Item *it, Jogador *j);
-int lerInteiro(); 
+int lerInteiro();
 
 #endif

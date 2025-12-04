@@ -1,16 +1,17 @@
 #include "jogo.h"
 #include "fila.h"
 #include <stdio.h>
+#include <string.h>
 
 // leitura segura de inteiro via fgets
 int lerInteiro() {
-  char buf[64];
-  if (!fgets(buf, sizeof(buf), stdin))
+  char buffer[64];
+  if (!fgets(buffer, sizeof(buffer), stdin))
     return -1;
-  int v = 0;
-  if (sscanf(buf, "%d", &v) != 1)
+  int inteiroLido = 0;
+  if (sscanf(buffer, "%d", &inteiroLido) != 1)
     return -1;
-  return v;
+  return inteiroLido;
 }
 
 // jogador
@@ -57,34 +58,19 @@ No *obterNoDestino(No *raiz, Jogador *j, int direcao) {
   if (!j || !j->atual)
     return NULL;
 
-  // subir para o pai
-  if (direcao == 2) {
-    return obterNoPai(raiz, j);
+  // 0 = subir, 1 = direita, 2 = esquerda
+  if (direcao == 0) {
+    return j->atual->pai;
+  } else if (direcao == 1) {
+    return j->atual->dir;
+  } else if (direcao == 2) {
+    return j->atual->esq;
   }
 
-  int idx = j->atual->index;
-  int nivel = j->atual->nivel;
-
-  int inicio = 1 << nivel;
-  int fim = (1 << (nivel + 1)) - 1;
-
-  int novoIdx = idx + direcao;
-
-  if (novoIdx < inicio || novoIdx > fim)
-    return NULL;
-
-  return arvoreBuscarPorIndice(raiz, novoIdx);
+  return NULL;
 }
 
-No *obterNoPai(No *raiz, Jogador *j) {
-  if (!j || !j->atual)
-    return NULL;
-  if (j->atual->index == 1)
-    return NULL; // já é raiz
-  return arvoreEncontrarPai(raiz, j->atual);
-}
-
-// Simula uma batalha por turnos
+// batalha por turnos
 int batalhaContraInimigo(Jogador *j, int poderInimigo) {
   printf("\n--- BATALHA INICIADA ---\n");
   printf(
@@ -94,58 +80,57 @@ int batalhaContraInimigo(Jogador *j, int poderInimigo) {
   int vidaInimigo = poderInimigo * 5;
 
   while (j->vida > 0 && vidaInimigo > 0) {
-    // Turno do Jogador
-    // Dano base = Forca, com variação aleatória (-5 a +5)
-    int variacao = (rand() % 11) - 5; 
+    // turno do Jogador
+    // dano base = Forca, com variação aleatória (-5 a +5)
+    int variacao = (rand() % 11) - 5;
     int danoJogador = j->forca + variacao;
 
     // dano minimo
     if (danoJogador < 1)
-      danoJogador = 1; 
+      danoJogador = 1;
 
     vidaInimigo -= danoJogador;
     char *mensagensAtaqueJogador[] = {
         ">> Voce desfere um golpe certeiro! Dano: %d | Inimigo HP: %d\n",
         ">> Sua arma encontra o alvo! Dano: %d | Inimigo HP: %d\n",
-        ">> Um ataque fulminante! Dano: %d | Inimigo HP: %d\n"
-    };
+        ">> Um ataque fulminante! Dano: %d | Inimigo HP: %d\n"};
     printf(mensagensAtaqueJogador[rand() % 3], danoJogador, vidaInimigo);
 
-    // vitoria do jogador 
+    // vitoria do jogador
     if (vidaInimigo <= 0)
       break;
 
-    // 2. Turno do Inimigo
+    // turno do Inimigo
     variacao = (rand() % 11) - 5;
     int danoInimigo = (poderInimigo - j->defesa) + variacao;
     if (danoInimigo < 0)
-      danoInimigo = 0; 
+      danoInimigo = 0;
 
     j->vida -= danoInimigo;
     char *mensagensAtaqueInimigo[] = {
         "<< O inimigo contra-ataca! Dano: %d | Jogador HP: %d\n",
         "<< Voce e atingido! Dano: %d | Jogador HP: %d\n",
-        "<< Um golpe brutal do inimigo! Dano: %d | Jogador HP: %d\n"
-    };
+        "<< Um golpe brutal do inimigo! Dano: %d | Jogador HP: %d\n"};
     printf(mensagensAtaqueInimigo[rand() % 3], danoInimigo, j->vida);
   }
 
   if (j->vida > 0) {
     return 1;
   } else {
-    return 0; 
+    return 0;
   }
 }
 
-void resolverEncontroComum(Jogador *j, No *destino) {
+void resolverEncontroComum(Jogador *j, No *destino, Fila *log) {
+  char buffer[256];
   if (!j || !destino)
     return;
   printf("\n!!! ENCONTRO DE BATALHA !!!\n");
-  printf("Ao adentrar %s, Jogador %d foi surpreendido por um inimigo!\n", destino->nome, j->id);
+  printf("Ao adentrar %s, Jogador %d foi surpreendido por um inimigo!\n",
+         destino->nome, j->id);
 
-  // determina força do inimigo com base no nível do território (invertido)
-  // Nivel 3 (folha) -> inimigo fraco | Nivel 0 (raiz) -> inimigo forte
-  int poderInimigo = 10 + (3 - destino->nivel) * 10; 
+  // determina força do inimigo com base no nível do território
+  int poderInimigo = 10 + (3 - destino->nivel) * 10;
 
   printf("Poder do inimigo: %d | Forca do jogador: %d\n", poderInimigo,
          j->forca);
@@ -154,41 +139,37 @@ void resolverEncontroComum(Jogador *j, No *destino) {
 
   if (resultado) {
     printf("\n*** VITORIA! ***\n");
-    printf("Jogador %d derrota o inimigo em %s! Vida restante: %d/%d\n", j->id, destino->nome, j->vida, j->vidaMaxima);
+    printf("Jogador %d derrota o inimigo em %s! Vida restante: %d/%d\n", j->id,
+           destino->nome, j->vida, j->vidaMaxima);
     j->atual->ocupado = 0;
     destino->ocupado = j->id;
     j->atual = destino;
+
     jogadorVisitarNo(j, destino);
+    sprintf(buffer, "Jogador %d venceu batalha em %s. Vida restante: %d", j->id,
+            destino->nome, j->vida);
+    filaEnfileirar(log, buffer);
+
   } else {
     printf("\n--- DERROTA --- \n");
-    printf("Jogador %d foi humilhado em %s e perde a batalha!\n", j->id, destino->nome);
-    printf("Exausto, Jogador %d permanece em %s, reunindo suas forcas e recuperando parte da vida.\n", j->id,
-           j->atual->nome);
+    printf("Jogador %d foi humilhado em %s e perde a batalha!\n", j->id,
+           destino->nome);
+    printf("Exausto, Jogador %d permanece em %s, reunindo suas forcas e "
+           "recuperando parte da vida.\n",
+           j->id, j->atual->nome);
 
     if (j->vida <= 0)
-      j->vida = 30; // Recupera vida apos desmaio
+      j->vida = 30; // recupera vida apos desmaio
+    sprintf(buffer,
+            "Jogador %d perdeu batalha em %s. Permanece em %s. Vida: %d", j->id,
+            destino->nome, j->atual->nome, j->vida);
+    filaEnfileirar(log, buffer);
   }
 }
 
-// Altera a assinatura e adiciona logs
-void jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao,
-                  Fila *log) {
-  char buffer[256]; // Buffer para formatar as mensagens
-
-  // Regra de subir nível
-  if (direcao == 2) {
-    int nivel = j->atual ? j->atual->nivel : 0;
-    int totalNosNoNivel = 1 << nivel;
-    if (!j->chave && j->visitados[nivel] < totalNosNoNivel) {
-      printf("Jogador %d NAO pode subir...\n", j->id);
-
-      // LOG
-      sprintf(buffer, "[FALHA] Jogador %d tentou subir mas nao tem chave.",
-              j->id);
-      filaEnfileirar(log, buffer);
-      return;
-    }
-  }
+// altera a assinatura e adiciona logs
+int jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao, Fila *log) {
+  char buffer[256];
 
   No *destino = obterNoDestino(raiz, j, direcao);
 
@@ -197,185 +178,170 @@ void jogadorMover(Jogador *j, Jogador *outro, No *raiz, int direcao,
         "Nao ha caminho por ali... A parede e solida.",
         "Um abismo intransponivel bloqueia essa direcao.",
         "A passagem esta desmoronada. Nao e possivel avancar.",
-        "Voce encontra um emaranhado de vinhas e espinhos. Impossivel prosseguir."
-    };
+        "Voce encontra um emaranhado de vinhas e espinhos. Impossivel "
+        "prosseguir."};
     printf("Jogador %d: %s\n", j->id, mensagensInvalido[rand() % 4]);
-    sprintf(buffer, "[FALHA] Jogador %d tentou mover em direcao invalida.", j->id);
+    sprintf(buffer, "[FALHA] Jogador %d tentou mover em direcao invalida.",
+            j->id);
     filaEnfileirar(log, buffer);
-    return;
+    return 0;
   }
 
-  // LOG DE MOVIMENTO
+  if (strcmp(destino->nome, "Nucleo-X") == 0) {
+    int total_visitados = 0;
+    for (int i = 0; i < 4; i++) {
+      total_visitados += j->visitados[i];
+    }
+
+    // se o jogador nao visitou pelo menos 4 nós, ele nao poderá subir para o
+    // Nucleo-X
+    if (total_visitados < 4) {
+      printf("Jogador %d: Voce precisa explorar mais o mapa (pelo menos 4 "
+             "areas) antes de tentar acessar o Nucleo-X!\n",
+             j->id);
+      sprintf(buffer,
+              "[FALHA] Jogador %d tentou acessar o Nucleo-X sem explorar o "
+              "suficiente.",
+              j->id);
+      filaEnfileirar(log, buffer);
+      return 0;
+    }
+  }
+
+  // log de movimento para debug
   sprintf(buffer, "Jogador %d moveu-se para %s (Tipo: %d)", j->id,
           destino->nome, destino->tipo);
   filaEnfileirar(log, buffer);
 
-  // Se nó está ocupado pelo outro jogador = Duelo
-  if (destino->ocupado == outro->id) {
-    sprintf(buffer, "[DUELO] Jogador %d encontrou Jogador %d em %s!", j->id,
-            outro->id, destino->nome);
+  // checa o Nucleo-X e verifica se o outro jogador esta la para um duelo
+  if (strcmp(destino->nome, "Nucleo-X") == 0 && destino->ocupado == outro->id) {
+    sprintf(buffer, "[DUELO FINAL] Jogador %d encontrou Jogador %d em %s!",
+            j->id, outro->id, destino->nome);
     filaEnfileirar(log, buffer);
 
-    resolverDuelo(j, outro, destino, raiz);
-    return;
+    return resolverDuelo(j, outro, destino, raiz); // Retorna o vencedor
   }
 
-  // SE O NÓ ESTIVER LIVRE, JÁ REALIZA O MOVIMENTO LÓGICO
-  // (A descrição do que acontece vem nos ifs abaixo)
+  // logica do nó de batalha
+  if (destino->tipo == BATALHA) {
+    sprintf(buffer, "[BATALHA] Jogador %d entrou em zona de perigo %s", j->id,
+            destino->nome);
+    filaEnfileirar(log, buffer);
+    resolverEncontroComum(j, destino, log);
+    return 0; // resolverEncontroComum handles movement if player wins
+  }
+
+  // Se o nó estiver ocupado pelo outro jogador (e não for Nucleo-X), impede o
+  // movimento
+  if (destino->ocupado == outro->id) {
+    printf("Jogador %d: O caminho para %s esta bloqueado pelo outro jogador!\n",
+           j->id, destino->nome);
+    sprintf(buffer,
+            "[FALHA] Jogador %d tentou mover para %s, mas estava ocupado pelo "
+            "Jogador %d.",
+            j->id, destino->nome, outro->id);
+    filaEnfileirar(log, buffer);
+    return 0;
+  }
+
+  // Se o nó estiver livre, realiza o movimento
   j->atual->ocupado = 0;
   destino->ocupado = j->id;
   j->atual = destino;
   jogadorVisitarNo(j, destino);
 
-
-  //TRATAMENTO DOS TIPOS DE TERRENO 
-  // Se nó é recurso
+  // nó de recurso
   if (destino->tipo == RECURSO) {
-      int rng = rand() % 100;
-      ItemTipo tipoItem;
-      int valorItem = 0;
-      char nomeItem[50];
+    int rng = rand() % 100;
+    ItemTipo tipoItem;
+    int valorItem = 0;
+    char nomeItem[50];
 
-      if (rng < 40) { // 40% Pocao
-          tipoItem = ITEM_POCAO;
-          valorItem = 20 + (rand() % 21); // 20-40 HP
-          sprintf(nomeItem, "Pocao de Vida");
-      } else if (rng < 65) { // 25% Arma
-          tipoItem = ITEM_ARMA;
-          valorItem = 3 + (rand() % 6); // 3-8 Forca
-          sprintf(nomeItem, "Espada Longa");
-      } else if (rng < 85) { // 20% Armadura
-          tipoItem = ITEM_ARMADURA;
-          valorItem = 2 + (rand() % 5); // 2-6 Defesa
-          sprintf(nomeItem, "Escudo de Aco");
-      } else if (rng < 95) { // 10% Amuleto
-          tipoItem = ITEM_AMULETO;
-          valorItem = 15 + (rand() % 16); // 15-30 Vida Max/Atual
-          sprintf(nomeItem, "Amuleto Antigo");
-      } else { // 5% CHAVE MESTRA
-          j->chave = 1;
-          sprintf(nomeItem, "CHAVE MESTRA");
-          printf("\n*** ITEM RARO !!! ***\n");
-          printf("Voce encontrou a CHAVE MESTRA! Agora pode subir de nivel livremente.\n");
-          tipoItem = ITEM_POCAO; valorItem = 10; 
-      }
+    if (rng < 40) { // 40% Pocao
+      tipoItem = ITEM_POCAO;
+      valorItem = 20 + (rand() % 21); // 20-40 HP
+      sprintf(nomeItem, "Pocao de Vida");
+    } else if (rng < 65) { // 25% Arma
+      tipoItem = ITEM_ARMA;
+      valorItem = 3 + (rand() % 6); // 3-8 Forca
+      sprintf(nomeItem, "Espada Longa");
+    } else if (rng < 85) { // 20% Armadura
+      tipoItem = ITEM_ARMADURA;
+      valorItem = 2 + (rand() % 5); // 2-6 Defesa
+      sprintf(nomeItem, "Escudo de Aco");
+    } else { // 15% Amuleto
+      tipoItem = ITEM_AMULETO;
+      valorItem = 15 + (rand() % 16); // 15-30 Vida Max/Atual
+      sprintf(nomeItem, "Amuleto Antigo");
+    }
 
-      // Adiciona ao inventário
-      inventarioAdicionar(&j->inventario, tipoItem, valorItem);
-      
-      if (tipoItem != ITEM_POCAO) {
-        inventarioAplicarAoJogador(j->inventario, j); 
-        printf("Item equipado automaticamente!\n");
-      } else {
-        printf("Poção guardada no inventário.\n");
-      }
+    inventarioAdicionar(&j->inventario, tipoItem, valorItem);
 
-      printf("\n*** AREA DE RECURSO! ***\n");
-      printf("Enquanto explorava %s, Jogador %d encontrou algo cintilante...\n", destino->nome, j->id);
-      printf("Ao investigar mais de perto, revelou-se um bau antigo!\n");
-      printf("Dentro dele havia: %s (+%d)!\n", nomeItem, valorItem);
+    if (tipoItem != ITEM_POCAO) {
+      inventarioAplicarAoJogador(j->inventario, j);
+      printf("Item equipado automaticamente!\n");
+    } else {
+      printf("Poção guardada no inventário.\n");
+    }
 
-      sprintf(buffer, "Jogador %d pegou %s (+%d) em %s", j->id, nomeItem, valorItem, destino->nome);
-      filaEnfileirar(log, buffer);
+    printf("\n*** AREA DE RECURSO! ***\n");
+    printf("Enquanto explorava %s, Jogador %d encontrou algo cintilante...\n",
+           destino->nome, j->id);
+    printf("Ao investigar mais de perto, revelou-se um bau antigo!\n");
+    printf("Dentro dele havia: %s (+%d)!\n", nomeItem, valorItem);
 
-      // Consome o recurso virando normal
-      destino->tipo = NORMAL; 
-  }
-  else if (destino->tipo == NORMAL){
+    sprintf(buffer, "Jogador %d pegou %s (+%d) em %s", j->id, nomeItem,
+            valorItem, destino->nome);
+    filaEnfileirar(log, buffer);
+
+    // consome o recurso, transformando o nó em tipo normal
+    destino->tipo = NORMAL;
+  } else if (destino->tipo == NORMAL) {
     char *mensagensNormal[] = {
         "O ar aqui e denso, mas nao ha perigo aparente. Voce segue adiante.",
-        "A passagem se estreita e depois se abre em uma caverna vazia. Tudo calmo.",
+        "A passagem se estreita e depois se abre em uma caverna vazia. Tudo "
+        "calmo.",
         "Rochas humidas e um eco distante. Nenhum sinal de presenca inimiga.",
-        "Uma area estranhamente serena. Bom para um breve descanso, mas você não tem tempo para isso."
-    };
+        "Uma area estranhamente serena. Bom para um breve descanso, mas você "
+        "não tem tempo para isso."};
 
     int mensagemNormalSorteada = rand() % 4;
     printf("\n--- CAMINHO SEGURO ---\n");
     printf("%s\n", mensagensNormal[mensagemNormalSorteada]);
 
-    sprintf(buffer, "Jogador %d avancou em seguranca para %s.", j->id, destino->nome);
-    filaEnfileirar(log, buffer);
-  }
-
-  // Se nó é batalha
-  if (destino->tipo == BATALHA) {
-    sprintf(buffer, "[BATALHA] Jogador %d entrou em zona de perigo %s", j->id,
+    sprintf(buffer, "Jogador %d avancou em seguranca para %s.", j->id,
             destino->nome);
     filaEnfileirar(log, buffer);
-    resolverEncontroComum(j, destino);
-    return;
   }
+  return 0; // Jogo continua
 }
 
-void resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz) {
-  printf("\n!!! ENCONTRO HOSTIL: DUELO !!!\n");
-  printf("Os olhares se cruzam: Jogador %d desafia Jogador %d no nó %s!\n", j1->id, j2->id,
-         destino->nome);
+int resolverDuelo(Jogador *j1, Jogador *j2, No *destino, No *raiz) {
+  printf("\n!!! DUELO FINAL NO NUCLEO-X !!!\n");
+  printf("Os olhares se cruzam: Jogador %d desafia Jogador %d!\n", j1->id,
+         j2->id);
 
-  // exemplo simples: 50% de chance de cada um vencer
-  int vencedor = (rand() % 2) ? j1->id : j2->id;
+  // Lógica de batalha simplificada
+  int poderJ1 = j1->forca + j1->defesa + j1->vida;
+  int poderJ2 = j2->forca + j2->defesa + j2->vida;
+  int vencedor = (poderJ1 > poderJ2) ? j1->id : j2->id;
+
+  printf("\nO combate final comeca!\n");
 
   if (vencedor == j1->id) {
-    printf("\n*** Jogador %d domina o duelo! ***\n", j1->id);
-
-    // Jogador 1 toma o nó
-    j2->atual->ocupado = 0; // o perdedor sai do nó
-    destino->ocupado = j1->id;
-    j1->atual = destino;
-    jogadorVisitarNo(j1, destino);
-
-    // Jogador 2 é penalizado
-    printf("Jogador %d e forcado a recuar e sofre penalidades!\n", j2->id);
-    if (j2->atual->nivel > 0) {
-      // cair um nível
-      int idx = j2->atual->index;
-      int idxPai = idx / 2;
-      No *novo = arvoreBuscarPorIndice(raiz, idxPai);
-      if (novo) {
-        j2->atual = novo;
-        j2->atual->ocupado = j2->id;
-        printf(">>> Jogador %d cai para o nivel %d (no %s).\n", j2->id, novo->nivel,
-               novo->nome);
-      }
-    } else {
-      // penalidade no nível básico manda para nó extremo
-      No *novo = arvoreBuscarPorIndice(raiz, 15);
-      j2->atual = novo;
-      j2->atual->ocupado = j2->id;
-      printf(">>> Jogador %d e banido para o no mais distante: %s!\n", j2->id,
-             novo->nome);
-    }
-
+    printf("\n*** Jogador %d domina o duelo e conquista o Nucleo-X! ***\n",
+           j1->id);
+    printf("VITORIA PARA O JOGADOR %d!\n", j1->id);
   } else {
-    printf("\n*** Jogador %d DOMINA o duelo! ***\n", j2->id);
-
-    // Jogador 2 toma o nó
-    j1->atual->ocupado = 0;
-    destino->ocupado = j2->id;
-    j2->atual = destino;
-    jogadorVisitarNo(j2, destino);
-
-    // Jogador 1 recebe penalidade
-    printf("Jogador %d e forcado a recuar e sofre penalidades!\n", j1->id);
-    if (j1->atual->nivel > 0) {
-      int idx = j1->atual->index;
-      int idxPai = idx / 2;
-      No *novo = arvoreBuscarPorIndice(raiz, idxPai);
-      if (novo) {
-        j1->atual = novo;
-        j1->atual->ocupado = j1->id;
-        printf(">>> Jogador %d cai para o nivel %d (no %s).\n", j1->id, novo->nivel,
-               novo->nome);
-      }
-    } else {
-      No *novo = arvoreBuscarPorIndice(raiz, 8);
-      j1->atual = novo;
-      j1->atual->ocupado = j1->id;
-      printf(">>> Jogador %d e banido para o no mais distante: %s!\n", j1->id, novo->nome);
-    }
+    printf("\n*** Jogador %d domina o duelo e conquista o Nucleo-X! ***\n",
+           j2->id);
+    printf("VITORIA PARA O JOGADOR %d!\n", j2->id);
   }
 
-  printf("\n=== O DUELO CHEGA AO FIM ===\n\n");
+  printf("\n=== O JOGO CHEGA AO FIM ===\n\n");
+
+  // retorna o ID do vencedor
+  return vencedor;
 }
 void inventarioAplicarAoJogador(Item *it, Jogador *j) {
   if (!it || !j)
@@ -385,5 +351,5 @@ void inventarioAplicarAoJogador(Item *it, Jogador *j) {
   else if (it->tipo == ITEM_ARMA)
     j->forca += it->valor;
   else if (it->tipo == ITEM_AMULETO)
-    j->vidaMaxima += it->valor; // Amuleto aumenta vida maxima
+    j->vidaMaxima += it->valor; // amuleto aumenta vida maxima
 }

@@ -15,7 +15,7 @@ int filaVazia(Fila* f) {
 void filaEnfileirar(Fila* f, const char* msg) {
     NodoFila* novo = malloc(sizeof(NodoFila));
     
-    // Aloca memória exata para a mensagem e copia
+    // aloca memória a mensagem e copia
     novo->mensagem = malloc(strlen(msg) + 1);
     strcpy(novo->mensagem, msg);
     
@@ -33,25 +33,27 @@ char* filaDesenfileirar(Fila* f) {
     if (filaVazia(f)) return NULL;
 
     NodoFila* aux = f->inicio;
-    char* msg = aux->mensagem; // Guarda a mensagem para retornar
+
+    // guarda a mensagem para retornar
+    char* msg = aux->mensagem; 
 
     f->inicio = aux->prox;
     if (f->inicio == NULL) {
         f->fim = NULL;
     }
 
-    free(aux); // Libera apenas o nó, não a string (quem chamou que libere)
+    free(aux); 
     return msg;
 }
 
 void filaLimpar(Fila* f) {
     while (!filaVazia(f)) {
         char* msg = filaDesenfileirar(f);
-        free(msg); // Aqui liberamos a string pois estamos limpando tudo
+        free(msg);
     }
 }
 
-// Função para salvar o Log em TXT
+// salvar o Log em TXT
 void filaSalvarLog(Fila* f, const char* nomeArquivo) {
     FILE* arq = fopen(nomeArquivo, "w");
     if (!arq) {

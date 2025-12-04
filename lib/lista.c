@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Inventário (lista simples)
+// adiciona item ao inventario
 void inventarioAdicionar(Item **head, ItemTipo tipo, int valor) {
   if (!head)
     return;
@@ -13,6 +13,7 @@ void inventarioAdicionar(Item **head, ItemTipo tipo, int valor) {
   *head = novo;
 }
 
+// lista o inventario no terminal
 void inventarioListar(Item *head) {
   Item *it = head;
   printf("Inventario:\n");
@@ -33,7 +34,7 @@ void inventarioListar(Item *head) {
   }
 }
 
-// Procura a primeira poção, remove da lista e retorna o valor de cura.
+// procura a primeira poção, remove da lista e retorna o valor de cura.
 // Retorna 0 se não houver poção.
 int inventarioConsumirPocao(Item **head) {
   if (!head || !*head)
@@ -45,14 +46,14 @@ int inventarioConsumirPocao(Item **head) {
   while (atual) {
     if (atual->tipo == ITEM_POCAO) {
       int cura = atual->valor;
-      
-      // Remove o nó da lista
+
+      // remove o nó da lista
       if (ant) {
         ant->prox = atual->prox;
       } else {
         *head = atual->prox;
       }
-      
+
       free(atual);
       return cura;
     }
