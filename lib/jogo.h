@@ -20,7 +20,6 @@ typedef struct {
   int defesa;
 
   Item *inventario; // inventario (lista encadeada simples)
-  int chave;        // chave para subir niveis
 } Jogador;
 
 void jogadorInicializar(Jogador *j, int id, No *inicio);

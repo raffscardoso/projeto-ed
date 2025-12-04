@@ -37,7 +37,6 @@ void jogadorInicializar(Jogador *j, int id, No *inicio) {
   j->forca = 10;
   j->defesa = 5;
   j->inventario = NULL;
-  j->chave = 0;
 
   // Marca o primeiro nó como visitado
   jogadorVisitarNo(j, inicio);
